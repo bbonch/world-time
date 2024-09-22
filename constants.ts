@@ -1,0 +1,1 @@
+export const TIMES_STORAGE_KEY = 'times-storage-key'

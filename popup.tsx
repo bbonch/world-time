@@ -1,26 +1,55 @@
-import { useState } from "react"
+import 'style.css'
+import { useEffect, useRef, useState } from 'react'
+import { getTimes } from '~db'
+import TimeBlock from '~components/time-block'
+import type { Time } from '~types'
+import TimeBlockAdd from '~components/time-block-add'
+import { Storage } from '@plasmohq/storage'
+import { TIMES_STORAGE_KEY } from '~constants'
 
-function IndexPopup() {
-  const [data, setData] = useState("")
+function Popup() {
+  const [times, setTimes] = useState<Array<Time>>([])
+  const [currentDateTime, setCurrentDateTime] = useState<Date>(new Date())
+  const interval = useRef<NodeJS.Timeout>()
+  const storage = new Storage()
+
+  const updateTimes = async () => {
+    const times = await getTimes()
+    setTimes(times)
+  }
+
+  useEffect(() => {
+    interval.current = setInterval(() => {
+      setCurrentDateTime(new Date())
+    }, 1000)
+    updateTimes()
+    storage.watch({
+      [TIMES_STORAGE_KEY]: (n) => {
+        setTimes(n.newValue)
+      }
+    })
+
+    return () => {
+      clearInterval(interval.current)
+      storage.unwatchAll()
+    }
+  }, [])
+
+  const timeBlocks = times.map((time) => {
+    return <TimeBlock key={time.place} place={time.place} timeZone={time.timeZone} dateTime={currentDateTime} />
+  })
 
   return (
-    <div
-      style={{
-        padding: 16
-      }}>
-      <h2>
-        Welcome to your{" "}
-        <a href="https://www.plasmo.com" target="_blank">
-          Plasmo
-        </a>{" "}
-        Extension!
-      </h2>
-      <input onChange={(e) => setData(e.target.value)} value={data} />
-      <a href="https://docs.plasmo.com" target="_blank">
-        View Docs
-      </a>
+    <div className="grid grid-cols-3 gap-4 p-4">
+      {times.length == 0 && <div>Loading...</div>}
+      {times.length > 0 &&
+        <>
+          {timeBlocks}
+          <TimeBlockAdd />
+        </>
+      }
     </div>
   )
 }
 
-export default IndexPopup
+export default Popup
