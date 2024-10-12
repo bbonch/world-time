@@ -5,14 +5,20 @@ const TimeBlockAdd = () => {
     const [isAddMode, setIsAddMode] = useState<boolean>(false)
     const allTimes = useMemo(() => getAllTimes(), [])
     const [selectedTimeZone, setSelectedTimeZone] = useState<string>(allTimes[0].timeZone)
+    const [error, setError] = useState<string>('')
 
     async function addClicked() {
         const tzParts = selectedTimeZone.split('/')
-        setIsAddMode(false)
-        await addTime({
+        const error = await addTime({
             timeZone: selectedTimeZone,
             place: tzParts[1]
         })
+
+        if (!error) {
+            setIsAddMode(false)
+        } else {
+            setError(error)
+        }
     }
 
     function timeZoneChanged(event: ChangeEvent<HTMLSelectElement>): void {
@@ -20,9 +26,12 @@ const TimeBlockAdd = () => {
     }
 
     return (
-        <div className="p-4 border-neutral border rounded flex flex-col justify-center items-center h-[88px]">
+        <div className="p-4 border rounded flex flex-col justify-center items-center h-[88px]">
             {!isAddMode &&
-                <div onClick={() => setIsAddMode(true)}><button type="button">+</button></div>
+                <div onClick={() => {
+                    setError('')
+                    setIsAddMode(true)
+                }}><button type="button">+</button></div>
             }
             {isAddMode &&
                 <>
@@ -32,12 +41,15 @@ const TimeBlockAdd = () => {
                         })}
                     </select>
                     <div className="flex gap-1 mt-1">
-                        <button className="border-neutral-100 rounded border p-1" type="button" onClick={() => {
+                        <button className="rounded border p-1" type="button" onClick={() => {
                             setSelectedTimeZone(allTimes[0].timeZone)
                             setIsAddMode(false)
                         }}>Cancel</button>
-                        <button className="border-neutral-100 rounded border p-1" type="button" onClick={addClicked}>Add</button>
+                        <button className="rounded border p-1" type="button" onClick={addClicked}>Add</button>
                     </div>
+                    {error != '' &&
+                        <div className="text-red-500">{error}</div>
+                    }
                 </>
             }
         </div>

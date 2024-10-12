@@ -1,4 +1,5 @@
 import { deleteTime } from "~db"
+import { formatPlace } from "~services/format"
 
 type Props = {
     place: string,
@@ -13,14 +14,13 @@ const TimeBlock = ({ place, dateTime, timeZone }: Props) => {
     const timePart = dateTimeParts[1].trimStart()
 
     async function deleteClicked(): Promise<void> {
-        debugger
         await deleteTime(place)
     }
 
     return (
         <div className="p-4 border-neutral border rounded flex flex-col justify-center items-center relative">
             <button className="absolute top-1 right-1 leading-[0]" type="button" onClick={deleteClicked}>-</button>
-            <div>{place}</div>
+            <div>{formatPlace(place)}</div>
             <div>{datePart}</div>
             <div>{timePart}</div>
         </div>
