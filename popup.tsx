@@ -41,13 +41,12 @@ function Popup() {
 
   return (
     <div className="grid grid-cols-3 gap-4 p-4">
-      {times.length == 0 && <div>Loading...</div>}
       {times.length > 0 &&
         <>
           {timeBlocks}
-          <TimeBlockAdd />
         </>
       }
+      <TimeBlockAdd />
     </div>
   )
 }
